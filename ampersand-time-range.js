@@ -6,14 +6,24 @@
   var AmpersandView = require('ampersand-view');
 
   var TimeRangeState = AmpersandState.extend({
-    props: {
-      startTime: 'number',
-      endTime: 'number'
-    },
     session: {
       startX: [ 'number', false , 20 ],
       endX: [ 'number', false, -1 ],
       width: 'number'
+    },
+    derived: {
+      startTime: {
+        deps: [ 'startX' ],
+        fn: function() {
+          return this.map(this.startX - 20, 0, this.width, 0, 1439);
+        }
+      },
+      endTime: {
+        deps: [ 'endX' ],
+        fn: function() {
+          return this.map(this.endX - 20, 0, this.width, 0, 1439);
+        }
+      }
     },
     map: function(s, a1, a2, b1, b2) {
       return Math.round(b1 + (s - a1) * (b2 - b1) / (a2 - a1));
@@ -32,6 +42,26 @@
     autoRender: true,
     initialize: function() {
       this.model._view = this;
+    },
+    bindings: {
+      'model.startX': {
+        type: function(el, startX) {
+          if (this.svg) {
+            this.svg.select('circle.ampersand-time-range-handle-start')
+              .attr('cx', startX);
+            this.resizeDuration();
+          }
+        }
+      },
+      'model.endX': {
+        type: function(el, endX) {
+          if (this.svg) {
+            this.svg.select('circle.ampersand-time-range-handle-end')
+              .attr('cx', endX);
+            this.resizeDuration();
+          }
+        }
+      }
     },
     render: function() {
       AmpersandView.prototype.render.call(this);
@@ -87,10 +117,6 @@
           d.x = Math.max(20, d3.mouse(bar)[0]);
           d.x = Math.min(d.x, d.model.endX);
           d.model.startX = d.x;
-          d3.select(this)
-            .attr('cx', d.model.startX);
-          d.view.resizeDuration();
-          d.model.startTime = d.model.map(d.model.startX - 20, 0, d.model.width, 0, 1439);
           d.view.setToolTip(d.model.startX, d.model.startTime);
         })
         .on('dragend', function(d, i) {
@@ -115,10 +141,6 @@
           d.x = Math.min(d.model.width + 20, d3.mouse(bar)[0]);
           d.x = Math.max(d.x, d.model.startX);
           d.model.endX = d.x;
-          d3.select(this)
-            .attr('cx', d.model.endX);
-          d.view.resizeDuration();
-          d.model.endTime = d.model.map(d.model.endX - 20, 0, d.model.width, 0, 1439);
           d.view.setToolTip(d.model.endX, d.model.endTime);
         })
         .on('dragend', function(d, i) {
