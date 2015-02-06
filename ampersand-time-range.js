@@ -15,13 +15,13 @@
       startTime: {
         deps: [ 'startX' ],
         fn: function() {
-          return this.map(this.startX - 20, 0, this.width, 0, 1439);
+          return this.startX === 20 ? 0 : this.map(this.startX - 20, 0, this.width, 0, 1440);
         }
       },
       endTime: {
         deps: [ 'endX' ],
         fn: function() {
-          return this.map(this.endX - 20, 0, this.width, 0, 1439);
+          return this.startX === -1 ? 1440 : this.map(this.endX - 20, 0, this.width, 0, 1440);
         }
       }
     },
@@ -31,7 +31,7 @@
     intToTimeString: function(s) {
       var hours = Math.floor(s / 60);
       var minutes = s % 60;
-      var meridian = s / 60 >= 12 ? 'pm' : 'am';
+      var meridian = s / 60 >= 12 && s !== 1440 ? 'pm' : 'am';
 
       return (hours % 12 !== 0 ? hours % 12 : 12) + ':' + (minutes > 9 ? minutes : '0' + minutes) + ' ' + meridian;
     }
