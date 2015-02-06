@@ -7,11 +7,23 @@
 
   var TimeRangeState = AmpersandState.extend({
     session: {
-      startTime: 'number',
-      endTime: 'number',
       startX: [ 'number', false , 20 ],
       endX: [ 'number', false, -1 ],
       width: 'number'
+    },
+    derived: {
+      startTime: {
+        deps: [ 'startX' ],
+        fn: function() {
+          return this.startX === 20 ? 0 : this.map(this.startX - 20, 0, this.width, 0, 1440);
+        }
+      },
+      endTime: {
+        deps: [ 'endX' ],
+        fn: function() {
+          return this.startX === -1 ? 1440 : this.map(this.endX - 20, 0, this.width, 0, 1440);
+        }
+      }
     },
     map: function(s, a1, a2, b1, b2) {
       return Math.round(b1 + (s - a1) * (b2 - b1) / (a2 - a1));
@@ -19,7 +31,7 @@
     intToTimeString: function(s) {
       var hours = Math.floor(s / 60);
       var minutes = s % 60;
-      var meridian = s / 60 >= 12 ? 'pm' : 'am';
+      var meridian = s / 60 >= 12 && s !== 1440 ? 'pm' : 'am';
 
       return (hours % 12 !== 0 ? hours % 12 : 12) + ':' + (minutes > 9 ? minutes : '0' + minutes) + ' ' + meridian;
     }
@@ -30,6 +42,26 @@
     autoRender: true,
     initialize: function() {
       this.model._view = this;
+    },
+    bindings: {
+      'model.startX': {
+        type: function(el, startX) {
+          if (this.svg) {
+            this.svg.select('circle.ampersand-time-range-handle-start')
+              .attr('cx', startX);
+            this.resizeDuration();
+          }
+        }
+      },
+      'model.endX': {
+        type: function(el, endX) {
+          if (this.svg) {
+            this.svg.select('circle.ampersand-time-range-handle-end')
+              .attr('cx', endX);
+            this.resizeDuration();
+          }
+        }
+      }
     },
     render: function() {
       AmpersandView.prototype.render.call(this);
@@ -85,10 +117,6 @@
           d.x = Math.max(20, d3.mouse(bar)[0]);
           d.x = Math.min(d.x, d.model.endX);
           d.model.startX = d.x;
-          d3.select(this)
-            .attr('cx', d.model.startX);
-          d.view.resizeDuration();
-          d.model.startTime = d.model.map(d.model.startX - 20, 0, d.model.width, 0, 1439);
           d.view.setToolTip(d.model.startX, d.model.startTime);
         })
         .on('dragend', function(d, i) {
@@ -113,10 +141,6 @@
           d.x = Math.min(d.model.width + 20, d3.mouse(bar)[0]);
           d.x = Math.max(d.x, d.model.startX);
           d.model.endX = d.x;
-          d3.select(this)
-            .attr('cx', d.model.endX);
-          d.view.resizeDuration();
-          d.model.endTime = d.model.map(d.model.endX - 20, 0, d.model.width, 0, 1439);
           d.view.setToolTip(d.model.endX, d.model.endTime);
         })
         .on('dragend', function(d, i) {
