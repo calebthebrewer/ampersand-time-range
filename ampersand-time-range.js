@@ -6,9 +6,11 @@
   var AmpersandView = require('ampersand-view');
 
   var TimeRangeState = AmpersandState.extend({
-    session: {
+    props: {
       startTime: 'number',
-      endTime: 'number',
+      endTime: 'number'
+    },
+    session: {
       startX: [ 'number', false , 20 ],
       endX: [ 'number', false, -1 ],
       width: 'number'
