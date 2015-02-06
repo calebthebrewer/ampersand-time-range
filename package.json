@@ -1,6 +1,6 @@
 {
   "name": "ampersand-time-range",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "A time range input using Ampersand and D3.",
   "main": "ampersand-time-range.js",
   "scripts": {
