@@ -70,7 +70,7 @@
         .attr('class', 'ampersand-time-range')
         .style('overflow', 'visible')
         .attr('width', '100%')
-        .attr('height', '4em');
+        .attr('height', '3em');
 
       var leftMidnight = range.append('text')
         .attr('class', 'ampersand-time-range-midnight ampersand-time-range-midnight-left')
