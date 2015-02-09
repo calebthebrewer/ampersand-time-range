@@ -15,13 +15,13 @@
       startTime: {
         deps: [ 'startX' ],
         fn: function() {
-          return this.map(this.startX, 0, this.width, 0, 1440);
+          return typeof this.width === 'number' ? this.map(this.startX, 0, this.width, 0, 1440) : 0;
         }
       },
       endTime: {
         deps: [ 'endX' ],
         fn: function() {
-          return this.startX === -1 ? 1440 : this.map(this.endX, 0, this.width, 0, 1440);
+          return this.endX === -1 ? 1440 : this.map(this.endX, 0, this.width, 0, 1440);
         }
       }
     },
