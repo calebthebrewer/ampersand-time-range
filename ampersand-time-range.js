@@ -15,15 +15,18 @@
       startTime: {
         deps: [ 'startX' ],
         fn: function() {
-          return typeof this.width === 'number' ? this.map(this.startX, 0, this.width, 0, 1440) : 0;
+          return typeof this.width === 'number' ? this.roundFive(this.map(this.startX, 0, this.width, 0, 1440)) : 0;
         }
       },
       endTime: {
         deps: [ 'endX' ],
         fn: function() {
-          return this.endX === -1 ? 1440 : this.map(this.endX, 0, this.width, 0, 1440);
+          return this.endX === -1 ? 1440 : this.roundFive(this.map(this.endX, 0, this.width, 0, 1440));
         }
       }
+    },
+    roundFive: function(x) {
+      return Math.round(x / 5) * 5;
     },
     map: function(s, a1, a2, b1, b2) {
       return Math.round(b1 + (s - a1) * (b2 - b1) / (a2 - a1));
