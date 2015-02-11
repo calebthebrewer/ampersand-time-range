@@ -7,7 +7,7 @@
 
   var TimeRangeState = AmpersandState.extend({
     session: {
-      startX: [ 'number', false , 20 ],
+      startX: [ 'number', false , 0 ],
       endX: [ 'number', false, -1 ],
       width: 'number'
     },
@@ -15,15 +15,18 @@
       startTime: {
         deps: [ 'startX' ],
         fn: function() {
-          return this.startX === 20 ? 0 : this.map(this.startX - 20, 0, this.width, 0, 1440);
+          return typeof this.width === 'number' ? this.roundFive(this.map(this.startX, 0, this.width, 0, 1440)) : 0;
         }
       },
       endTime: {
         deps: [ 'endX' ],
         fn: function() {
-          return this.startX === -1 ? 1440 : this.map(this.endX - 20, 0, this.width, 0, 1440);
+          return this.endX === -1 ? 1440 : this.roundFive(this.map(this.endX, 0, this.width, 0, 1440));
         }
       }
+    },
+    roundFive: function(x) {
+      return Math.round(x / 5) * 5;
     },
     map: function(s, a1, a2, b1, b2) {
       return Math.round(b1 + (s - a1) * (b2 - b1) / (a2 - a1));
@@ -70,17 +73,17 @@
         .attr('class', 'ampersand-time-range')
         .style('overflow', 'visible')
         .attr('width', '100%')
-        .attr('height', '4em');
+        .attr('height', '3em');
 
       var leftMidnight = range.append('text')
         .attr('class', 'ampersand-time-range-midnight ampersand-time-range-midnight-left')
-        .attr('x', '5%')
+        .attr('x', '0')
         .attr('y', '1.5em')
         .text('12 am');
 
       var rightMidnight = range.append('text')
         .attr('class', 'ampersand-time-range-midnight ampersand-time-range-midnight-right')
-        .attr('x', '95%')
+        .attr('x', '100%')
         .attr('y', '1.5em')
         .text('12 am');
 
@@ -92,18 +95,18 @@
 
       var bar = range.append('rect')
         .attr('class', 'ampersand-time-range-bar')
-        .attr('x', '5%')
+        .attr('x', '0')
         .attr('y', '2em')
-        .attr('width', '90%')
+        .attr('width', '100%')
         .attr('height', '0.5em')
         .attr('rx', '0.25em')
         .attr('ry', '0.25em');
 
       var durationBar = range.append('line')
         .attr('class', 'ampersand-time-range-duration')
-        .attr('x1', '5%')
+        .attr('x1', '0')
         .attr('y1', '2.25em')
-        .attr('x2', '95%')
+        .attr('x2', '100%')
         .attr('y2', '2.25em');
 
       var handleStartDrag = d3.behavior.drag()
@@ -113,8 +116,8 @@
         .on('drag', function(d, i) {
           var bar = d.view.svg.select('rect.ampersand-time-range-bar')[0][0];
           d.model.width = bar.getBBox().width;
-          d.model.endX = d.model.endX > -1 ? d.model.endX : d.model.width + 20;
-          d.x = Math.max(20, d3.mouse(bar)[0]);
+          d.model.endX = d.model.endX > -1 ? d.model.endX : d.model.width;
+          d.x = Math.max(0, d3.mouse(bar)[0]);
           d.x = Math.min(d.x, d.model.endX);
           d.model.startX = d.x;
           d.view.setToolTip(d.model.startX, d.model.startTime);
@@ -127,7 +130,7 @@
         .data([{ x: 0, model: this.model, view: this }])
         .attr('class', 'ampersand-time-range-handle ampersand-time-range-handle-start')
         .attr('cy', '2.25em')
-        .attr('cx', '5%')
+        .attr('cx', '0')
         .attr('r', '0.5em')
         .call(handleStartDrag);
 
@@ -138,7 +141,7 @@
         .on('drag', function(d, i) {
           var bar = d.view.svg.select('rect.ampersand-time-range-bar')[0][0];
           d.model.width = bar.getBBox().width;
-          d.x = Math.min(d.model.width + 20, d3.mouse(bar)[0]);
+          d.x = Math.min(d.model.width, d3.mouse(bar)[0]);
           d.x = Math.max(d.x, d.model.startX);
           d.model.endX = d.x;
           d.view.setToolTip(d.model.endX, d.model.endTime);
@@ -151,7 +154,7 @@
         .data([{ x: 0, model: this.model, view: this }])
         .attr('class', 'ampersand-time-range-handle ampersand-time-range-handle-end')
         .attr('cy', '2.25em')
-        .attr('cx', '95%')
+        .attr('cx', '100%')
         .attr('r', '0.5em')
         .call(handleEndDrag);
 
